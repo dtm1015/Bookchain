@@ -1,0 +1,82 @@
+xports.findByIsbn = (req, res) => {
+  const isbn = req.params.isbn;
+
+  Books.findByPk(isbn)
+    .then(data => {
+      res.json(data);
+  })
+  .catch(err => {
+    res.status(500).send({
+      message: "Error retrieving Book with isbn=" + isbn
+    });
+  });
+};
+
+//FINDALL
+exports.findAll = (req, res) => {
+  //possibly find by author
+  const title = req.query.title;
+  var condition = title ? { author: `%${title}%` } : null;
+
+  Books.findAll({ where: condition} )
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving books."
+      });
+  });
+}
+
+//UPDATE
+exports.updateQuantity = (req, res) => {
+  const isbn = req.params.isbn;
+  const quantity = req.body.quantity;
+  
+  Books.update({Quantity: quantity}, {
+    where: { ISBN: isbn }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Book was updated successfully."
+        });
+      } else {
+        res.send({
+          message: `Cannot update Book with isbn=${isbn}. Either the book was not found or request body is empty!`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating Book with isbn=" + isbn
+      });
+    });
+};
+
+//DELETE
+exports.delete = (req, res) => {
+  const isbn = req.params.isbn;
+
+  Books.destroy({
+    where: { ISBN: isbn }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Book was deleted successfully!"
+        });
+      } else {
+        res.send({
+          message: `Cannot delete book with isbn=${isbn}.`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Book with isbn=" + isbn
+      });
+    });
+};
